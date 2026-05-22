@@ -10,46 +10,45 @@ on:
         type: choice
         options:
         - 12.1
-        - 11.0
       DEVICE_TREE:
         description: 'Custom Recovery Tree'
         required: true
-        default: 'https://github.com/<username>/<repo_name>'
+        default: 'https://github.com/IsaacCodesStuff/android_device_samsung_a06_fox.git'
       DEVICE_TREE_BRANCH:
-        description: 'Custom Recovery Tree Branch (use master if default)'
+        description: 'Custom Recovery Tree Branch'
         required: true
-        default: 'your_branch_name'
-      DEVICE_NAME:
-        description: 'Specify your Device Codename' # As is, just like your PRODUCT_DEVICE in your device tree.
-        required: true
-        default: '7304X'
+        default: 'fox_12.1'
       DEVICE_PATH:
-        description: 'Specify your Device Path (Check the DEVICE_PATH in BoardConfig.mk)' # As is, just like your DEVICE_PATH in your BoardConfig.mk
+        description: 'DEVICE_PATH'
         required: true
-        default: 'device/device`s_company/Codename'
+        default: 'device/samsung/a06'
+      DEVICE_NAME:
+        description: 'DEVICE_NAME'
+        required: true
+        default: 'a06'
       BUILD_TARGET:
-        description: 'Specify your Build Target' # The image suffix will be added later in build step.
+        description: 'Specify your Build Target'
         required: true
         default: 'recovery'
         type: choice
         options:
         - boot
         - recovery
-        - vendorboot
+        - vendor_boot
       LDCHECK:
         description: 'Use LDCHECK'
         required: false
         default: 'false'
         type: boolean
       LDCHECKPATH:
-        description: 'Path of blobs to check' # Use it know what kind of dependencies your missing for decryption blobs.
+        description: 'Path of blobs to check'
         required: true
-        default: 'system/bin/qseecomd'
+        default: 'system/bin/stk_rec_bypass'
 
 jobs:
   build:
     name: Build OFRP by ${{ github.actor }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     if: github.event.repository.owner.id == github.event.sender.id
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -59,13 +58,13 @@ jobs:
     permissions:
       contents: write
     steps:
-    - name: Checkout
+    - name: Check Out
       uses: actions/checkout@v6
-              
-    - name: Clean-up
+      
+    - name: Cleanup
       uses: rokibhasansagar/slimhub_actions@main
-
-    - name: Swap Space
+      
+    - name: Set Swap Space
       uses: pierotofy/set-swap-space@master
       with:
         swap-size-gb: 12
@@ -135,7 +134,7 @@ jobs:
         fi
 
     - name: Upload to Release
-      if: env.CHECK_IMG_IS_OK == 'true'
+      if: success()
       uses: softprops/action-gh-release@master
       with:
         files: |
@@ -143,15 +142,13 @@ jobs:
           ${{ env.OUTPUT_DIR }}/OrangeFox*.tar
           ${{ env.OUTPUT_DIR }}/OrangeFox*.zip
           ${{ env.OUTPUT_DIR }}/ramdisk-recovery.*
-        name: Unofficial OrangeFox for ${{ inputs.DEVICE_NAME }} // ${{ env.BUILD_DATE }}
+        name: Unofficial OFRP for ${{ inputs.DEVICE_NAME }} // ${{ env.BUILD_DATE }}
         tag_name: ${{ github.run_id }}
         body: |
           Build: ${{ inputs.MANIFEST_BRANCH }}
           Device: [Device Tree/Branch](${{ inputs.DEVICE_TREE }}/tree/${{ inputs.DEVICE_TREE_BRANCH }})
           Commit: Most recent [commit](${{ inputs.DEVICE_TREE }}/commit/${{ env.COMMIT_ID }}) during building.
-          MD5 (img): ${{ env.MD5_IMG }}
-          MD5 (zip): ${{ env.MD5_ZIP }}
-        prerelease: true
+        prerelease: false
 
     - name: Run LDCheck
       if: inputs.LDCHECK == 'true'

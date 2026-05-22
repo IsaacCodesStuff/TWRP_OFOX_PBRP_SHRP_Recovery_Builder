@@ -6,64 +6,55 @@ on:
       MANIFEST_BRANCH:
         description: 'TWRP Manifest Branch'
         required: true
-        default: ''
+        default: 'twrp-12.1'
         type: choice
         options:
         - twrp-14.1
         - twrp-14
         - twrp-12.1
-        - twrp-11
-        - twrp-10.0-deprecated
-        - twrp-9.0
-        - twrp-8.1
-        - twrp-8.1-macOS
-        - twrp-7.1
-        - twrp-6.0
-        - twrp-5.1
-        - twrp-4.4-deprecated
       DEVICE_TREE:
-        description: 'Custom Recovery Tree' # Your already made Device Tree for TWRP
+        description: 'Custom Recovery Tree'
         required: true
-        default: 'https://github.com/username/repo'
+        default: 'https://github.com/IsaacCodesStuff/android_device_samsung_a06_twrp.git'
       DEVICE_TREE_BRANCH:
-        description: 'Custom Recovery Tree Branch' # Your Device Tree Branch, make sure it's right.
+        description: 'Custom Recovery Tree Branch'
         required: true
-        default: 'enter_your_branch'
+        default: 'android-12.1'
       DEVICE_PATH:
         description: 'DEVICE_PATH'
         required: true
-        default: 'device/'
+        default: 'device/samsung/a06'
       DEVICE_NAME:
         description: 'DEVICE_NAME'
         required: true
-        default: ''
+        default: 'a06'
       MAKEFILE_NAME:
-        description: 'MAKEFILE_NAME (excluding .mk extension, Example: omni_7304F)'
+        description: 'MAKEFILE_NAME (excluding .mk extension)'
         required: true
-        default: 'omni_'
+        default: 'twrp_a06'
       BUILD_TARGET:
-        description: 'Specify your Build Target' # Pick among boot, recovery and vendor_boot
+        description: 'Specify your Build Target'
         required: true
         default: 'recovery'
         type: choice
         options:
         - boot
         - recovery
-        - vendorboot
+        - vendor_boot
       LDCHECK:
         description: 'Use LDCHECK'
         required: false
         default: 'false'
         type: boolean
       LDCHECKPATH:
-        description: 'Path of blobs to check' # Use it know what kind of dependencies your missing for decryption blobs.
+        description: 'Path of blobs to check'
         required: true
-        default: 'system/bin/qseecomd'
+        default: 'system/bin/stk_rec_bypass'
 
 jobs:
   build:
     name: Build TWRP by ${{ github.actor }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     if: github.event.repository.owner.id == github.event.sender.id
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -157,7 +148,7 @@ jobs:
         lunch ${{ inputs.MAKEFILE_NAME }}-eng && make clean && make ${{ inputs.BUILD_TARGET }}image -j$(nproc --all)
         echo "Done building your ${{ inputs.BUILD_TARGET }}.img"
 
-    - name: Set Build Date # Output will be use in Release
+    - name: Set Build Date
       run: |
         echo "BUILD_DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
       
@@ -176,7 +167,7 @@ jobs:
           Build: ${{ inputs.MANIFEST_BRANCH }}
           Device: [Device Tree/Branch](${{ inputs.DEVICE_TREE }}/tree/${{ inputs.DEVICE_TREE_BRANCH }})
           Commit: Most recent [commit](${{ inputs.DEVICE_TREE }}/commit/${{ env.COMMIT_ID }}) during building.
-        prerelease: true
+        prerelease: false
 
     - name: Run LDCheck
       if: inputs.LDCHECK == 'true'
