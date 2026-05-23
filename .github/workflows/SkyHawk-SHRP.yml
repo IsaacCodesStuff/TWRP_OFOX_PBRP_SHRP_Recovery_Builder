@@ -42,7 +42,6 @@ on:
       LDCHECK:
         description: 'Use LDCHECK'
         required: false
-        default: 'false'
         type: boolean
       LDCHECKPATH:
         description: 'Path of blobs to check'
@@ -52,7 +51,7 @@ on:
 jobs:
   build:
     name: Build SHRP by ${{ github.actor }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: github.event.repository.owner.id == github.event.sender.id
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

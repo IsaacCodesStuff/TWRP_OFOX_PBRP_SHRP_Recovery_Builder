@@ -38,7 +38,6 @@ on:
       LDCHECK:
         description: 'Use LDCHECK'
         required: false
-        default: 'false'
         type: boolean
       LDCHECKPATH:
         description: 'Path of blobs to check'
@@ -48,7 +47,7 @@ on:
 jobs:
   build:
     name: Build OFRP by ${{ github.actor }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: github.event.repository.owner.id == github.event.sender.id
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -142,7 +141,7 @@ jobs:
           ${{ env.OUTPUT_DIR }}/OrangeFox*.tar
           ${{ env.OUTPUT_DIR }}/OrangeFox*.zip
           ${{ env.OUTPUT_DIR }}/ramdisk-recovery.*
-        name: Unofficial OFRP for ${{ inputs.DEVICE_NAME }} // ${{ env.BUILD_DATE }}
+        name: Unofficial OFRP for ${{ inputs.DEVICE_NAME }} // ${{ inputs.BUILD_DATE }}
         tag_name: ${{ github.run_id }}
         body: |
           Build: ${{ inputs.MANIFEST_BRANCH }}
